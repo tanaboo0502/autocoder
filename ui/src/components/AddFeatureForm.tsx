@@ -17,6 +17,7 @@ export function AddFeatureForm({ projectName, onClose }: AddFeatureFormProps) {
   const [category, setCategory] = useState('')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [priority, setPriority] = useState('')
   const [steps, setSteps] = useState<Step[]>([{ id: `${formId}-step-0`, value: '' }])
   const [error, setError] = useState<string | null>(null)
   const [stepCounter, setStepCounter] = useState(1)
@@ -53,6 +54,7 @@ export function AddFeatureForm({ projectName, onClose }: AddFeatureFormProps) {
         name: name.trim(),
         description: description.trim(),
         steps: filteredSteps,
+        priority: priority ? parseInt(priority, 10) : undefined,
       })
       onClose()
     } catch (err) {
@@ -98,19 +100,34 @@ export function AddFeatureForm({ projectName, onClose }: AddFeatureFormProps) {
             </div>
           )}
 
-          {/* Category */}
-          <div>
-            <label className="block font-display font-bold mb-2 uppercase text-sm">
-              Category
-            </label>
-            <input
-              type="text"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="e.g., Authentication, UI, API"
-              className="neo-input"
-              required
-            />
+          {/* Category & Priority Row */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block font-display font-bold mb-2 uppercase text-sm">
+                Category
+              </label>
+              <input
+                type="text"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="e.g., Authentication, UI, API"
+                className="neo-input"
+                required
+              />
+            </div>
+            <div className="w-32">
+              <label className="block font-display font-bold mb-2 uppercase text-sm">
+                Priority
+              </label>
+              <input
+                type="number"
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                placeholder="Auto"
+                min="1"
+                className="neo-input"
+              />
+            </div>
           </div>
 
           {/* Name */}

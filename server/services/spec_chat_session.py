@@ -110,7 +110,7 @@ class SpecChatSession:
                     ],
                     permission_mode="acceptEdits",  # Auto-approve file writes for spec creation
                     max_turns=100,
-                    cwd=str(ROOT_DIR.resolve()),
+                    cwd=str(self.project_dir.resolve()),
                 )
             )
             # Enter the async context and track it
@@ -282,7 +282,7 @@ class SpecChatSession:
                             # Check app_spec.txt
                             if pending_writes["app_spec"] and tool_use_id == pending_writes["app_spec"].get("tool_id"):
                                 file_path = pending_writes["app_spec"]["path"]
-                                full_path = ROOT_DIR / file_path
+                                full_path = Path(file_path) if Path(file_path).is_absolute() else self.project_dir / file_path
                                 if full_path.exists():
                                     logger.info(f"app_spec.txt verified at: {full_path}")
                                     files_written["app_spec"] = True
@@ -300,7 +300,7 @@ class SpecChatSession:
                             # Check initializer_prompt.md
                             if pending_writes["initializer"] and tool_use_id == pending_writes["initializer"].get("tool_id"):
                                 file_path = pending_writes["initializer"]["path"]
-                                full_path = ROOT_DIR / file_path
+                                full_path = Path(file_path) if Path(file_path).is_absolute() else self.project_dir / file_path
                                 if full_path.exists():
                                     logger.info(f"initializer_prompt.md verified at: {full_path}")
                                     files_written["initializer"] = True

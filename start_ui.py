@@ -28,8 +28,14 @@ import time
 import webbrowser
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 
 ROOT = Path(__file__).parent.absolute()
+
+# Load environment variables from .env file
+# This ensures env vars like PROGRESS_N8N_WEBHOOK_URL are available to subprocesses
+load_dotenv(ROOT / ".env")
 VENV_DIR = ROOT / "venv"
 UI_DIR = ROOT / "ui"
 
