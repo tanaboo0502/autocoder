@@ -69,6 +69,8 @@ BUILTIN_TOOLS = [
     "Glob",
     "Grep",
     "Bash",
+    "WebFetch",
+    "WebSearch",
 ]
 
 
@@ -110,6 +112,9 @@ def create_client(project_dir: Path, model: str, yolo_mode: bool = False):
         # Bash permission granted here, but actual commands are validated
         # by the bash_security_hook (see security.py for allowed commands)
         "Bash(*)",
+        # Allow web tools for documentation lookup
+        "WebFetch",
+        "WebSearch",
         # Allow Feature MCP tools for feature management
         *FEATURE_MCP_TOOLS,
     ]
