@@ -257,6 +257,72 @@ async def delete_feature(project_name: str, feature_id: int):
         raise HTTPException(status_code=500, detail="Failed to delete feature")
 
 
+@router.get("/{feature_id}/file")
+async def get_feature_file(project_name: str, feature_id: int):
+    """
+    Get the generated file content for a completed feature.
+
+    Looks for a file matching the feature name in common output directories:
+    - content/{name}.md
+    - outputs/{name}.md
+    - {name}.md
+    """
+    project_name = validate_project_name(project_name)
+    project_dir = _get_project_path(project_name)
+
+    if not project_dir:
+        raise HTTPException(status_code=404, detail=f"Project '{project_name}' not found in registry")
+
+    if not project_dir.exists():
+        raise HTTPException(status_code=404, detail="Project directory not found")
+
+    _, Feature = _get_db_classes()
+
+    try:
+        with get_db_session(project_dir) as session:
+            feature = session.query(Feature).filter(Feature.id == feature_id).first()
+
+            if not feature:
+                raise HTTPException(status_code=404, detail=f"Feature {feature_id} not found")
+
+            # Try to find the file in common locations
+            feature_name = feature.name
+            possible_paths = [
+                project_dir / "content" / f"{feature_name}.md",
+                project_dir / "outputs" / f"{feature_name}.md",
+                project_dir / f"{feature_name}.md",
+                project_dir / "content" / f"{feature_name}.txt",
+                project_dir / "outputs" / f"{feature_name}.txt",
+            ]
+
+            for file_path in possible_paths:
+                if file_path.exists() and file_path.is_file():
+                    try:
+                        content = file_path.read_text(encoding="utf-8")
+                        return {
+                            "found": True,
+                            "path": file_path.as_posix(),
+                            "filename": file_path.name,
+                            "content": content,
+                        }
+                    except Exception as e:
+                        logger.warning(f"Failed to read file {file_path}: {e}")
+                        continue
+
+            return {
+                "found": False,
+                "path": None,
+                "filename": None,
+                "content": None,
+                "message": f"No file found for feature '{feature_name}'",
+            }
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Database error in get_feature_file")
+        raise HTTPException(status_code=500, detail="Database error occurred")
+
+
 @router.patch("/{feature_id}/skip")
 async def skip_feature(project_name: str, feature_id: int):
     """

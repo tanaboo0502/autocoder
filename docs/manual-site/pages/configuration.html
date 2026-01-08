@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>設定 - AutoCoder マニュアル</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>AutoCoder</h1>
+            <p class="tagline">Build Anything, Autonomously</p>
+        </div>
+        <ul class="nav-links">
+            <li><a href="../index.html">ホーム</a></li>
+            <li><a href="getting-started.html">はじめに</a></li>
+            <li><a href="architecture.html">アーキテクチャ</a></li>
+            <li><a href="commands.html">コマンドリファレンス</a></li>
+            <li><a href="ui-guide.html">UIガイド</a></li>
+            <li><a href="configuration.html" class="active">設定</a></li>
+            <li><a href="agents.html">エージェント</a></li>
+            <li><a href="troubleshooting.html">トラブルシューティング</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <h1>設定</h1>
+            <p class="subtitle">AutoCoderの設定とカスタマイズ</p>
+        </header>
+
+        <section>
+            <h2>設定ファイル一覧</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ファイル</th>
+                        <th>場所</th>
+                        <th>用途</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>requirements.txt</code></td>
+                        <td>autocoder/</td>
+                        <td>Python依存関係</td>
+                    </tr>
+                    <tr>
+                        <td><code>package.json</code></td>
+                        <td>autocoder/ui/</td>
+                        <td>Node.js依存関係</td>
+                    </tr>
+                    <tr>
+                        <td><code>security.py</code></td>
+                        <td>autocoder/</td>
+                        <td>許可コマンドリスト</td>
+                    </tr>
+                    <tr>
+                        <td><code>.env</code></td>
+                        <td>autocoder/</td>
+                        <td>環境変数（オプション）</td>
+                    </tr>
+                    <tr>
+                        <td><code>registry.db</code></td>
+                        <td>~/.autocoder/</td>
+                        <td>プロジェクトレジストリ</td>
+                    </tr>
+                    <tr>
+                        <td><code>credentials.json</code></td>
+                        <td>~/.claude/</td>
+                        <td>Claude認証情報</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>環境変数</h2>
+            <p><code>.env</code>ファイルで設定可能な環境変数です。</p>
+
+            <div class="code-block">
+                <div class="code-header"><span>.env の例</span></div>
+                <pre><code># Webhook通知（オプション）
+PROGRESS_N8N_WEBHOOK_URL=https://your-n8n-instance/webhook/xxx
+
+# APIポート（デフォルト: 8000）
+API_PORT=8000
+
+# UIポート（デフォルト: 5173）
+UI_PORT=5173
+
+# デバッグモード
+DEBUG=true
+
+# 最大イテレーション数
+MAX_ITERATIONS=100</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>セキュリティ設定</h2>
+            <p><code>security.py</code>でBashコマンドの許可リストを管理します。</p>
+
+            <h3>許可されたコマンド</h3>
+            <div class="code-block">
+                <div class="code-header"><span>security.py - ALLOWED_COMMANDS</span></div>
+                <pre><code>ALLOWED_COMMANDS = {
+    # ファイル操作
+    "ls", "cat", "head", "tail", "cp", "mkdir", "mv", "rm", "touch",
+
+    # Node.js関連
+    "npm", "npx", "pnpm", "node",
+
+    # バージョン管理
+    "git",
+
+    # コンテナ
+    "docker",
+
+    # ネットワーク
+    "curl",
+
+    # Python
+    "python", "python3", "pip", "pip3",
+}</code></pre>
+            </div>
+
+            <h3>コマンドを追加する</h3>
+            <div class="alert alert-warning">
+                <strong>注意:</strong> 新しいコマンドを追加する際は、セキュリティリスクを十分に検討してください。
+            </div>
+
+            <div class="code-block">
+                <div class="code-header"><span>カスタムコマンドの追加</span></div>
+                <pre><code># security.py を編集
+ALLOWED_COMMANDS = {
+    # 既存のコマンド...
+
+    # 追加するコマンド
+    "your-command",
+}</code></pre>
+            </div>
+
+            <h3>追加検証が必要なコマンド</h3>
+            <p>一部のコマンドは追加のセキュリティチェックを通過する必要があります。</p>
+            <ul>
+                <li><code>pkill</code> - プロセス終了</li>
+                <li><code>chmod</code> - 権限変更</li>
+                <li><code>init.sh</code> - 初期化スクリプト</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>プロジェクト設定</h2>
+            <p>各プロジェクトの<code>prompts/</code>ディレクトリで設定をカスタマイズできます。</p>
+
+            <h3>app_spec.txt</h3>
+            <p>プロジェクトの仕様を定義するXMLファイルです。</p>
+            <div class="code-block">
+                <div class="code-header"><span>app_spec.txt の例</span></div>
+                <pre><code>&lt;app_spec&gt;
+  &lt;name&gt;My Todo App&lt;/name&gt;
+  &lt;description&gt;シンプルなTodoアプリ&lt;/description&gt;
+  &lt;type&gt;web_app&lt;/type&gt;
+
+  &lt;tech_stack&gt;
+    &lt;frontend&gt;React, TypeScript&lt;/frontend&gt;
+    &lt;backend&gt;Node.js, Express&lt;/backend&gt;
+    &lt;database&gt;SQLite&lt;/database&gt;
+  &lt;/tech_stack&gt;
+
+  &lt;features&gt;
+    &lt;feature priority="high"&gt;タスクの追加&lt;/feature&gt;
+    &lt;feature priority="high"&gt;タスクの削除&lt;/feature&gt;
+    &lt;feature priority="medium"&gt;タスクの完了マーク&lt;/feature&gt;
+    &lt;feature priority="low"&gt;フィルター機能&lt;/feature&gt;
+  &lt;/features&gt;
+&lt;/app_spec&gt;</code></pre>
+            </div>
+
+            <h3>CLAUDE.md</h3>
+            <p>プロジェクト固有のClaude Codeガイダンスを定義します。</p>
+            <div class="code-block">
+                <div class="code-header"><span>CLAUDE.md の例</span></div>
+                <pre><code># Project Guidance
+
+## コーディング規約
+- TypeScriptを使用
+- 関数型コンポーネントを推奨
+- Prettierでフォーマット
+
+## テスト戦略
+- Playwrightでe2eテスト
+- コンポーネントテストはVitest
+
+## 注意事項
+- 環境変数は.env.exampleを参照
+- APIキーをコミットしない</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>エージェント設定</h2>
+            <p><code>.claude/agents/</code>ディレクトリでエージェントの動作をカスタマイズします。</p>
+
+            <h3>オーケストレーター設定</h3>
+            <div class="code-block">
+                <div class="code-header"><span>.claude/agents/orchestrator.md</span></div>
+                <pre><code># タスクルーティングロジック
+
+## スキル検出
+- キーワードマッチング
+- コンテキスト分析
+- 履歴参照
+
+## エージェント選択基準
+- カバレッジ率 &lt; 60%: 新規エージェント生成
+- カバレッジ率 60-90%: 複数エージェント統合
+- カバレッジ率 &gt; 90%: 既存エージェント使用</code></pre>
+            </div>
+
+            <h3>エージェントプール</h3>
+            <p>エージェントは3つのカテゴリに分類されます。</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>カテゴリ</th>
+                        <th>場所</th>
+                        <th>説明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Specialized</td>
+                        <td><code>pool/specialized/</code></td>
+                        <td>単一スキルに特化したエージェント</td>
+                    </tr>
+                    <tr>
+                        <td>Integrated</td>
+                        <td><code>pool/integrated/</code></td>
+                        <td>複数スキルを統合したエージェント</td>
+                    </tr>
+                    <tr>
+                        <td>Elite</td>
+                        <td><code>pool/elite/</code></td>
+                        <td>高パフォーマンスエージェント</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>プロンプトテンプレート</h2>
+            <p><code>.claude/templates/</code>でプロンプトをカスタマイズできます。</p>
+
+            <h3>利用可能なテンプレート</h3>
+            <ul>
+                <li><code>coding_prompt.template.md</code> - 通常のコーディングプロンプト</li>
+                <li><code>coding_prompt_yolo.template.md</code> - YOLOモード用プロンプト</li>
+                <li><code>initializer_prompt.template.md</code> - 初期化エージェント用プロンプト</li>
+            </ul>
+
+            <h3>テンプレート変数</h3>
+            <div class="code-block">
+                <div class="code-header"><span>利用可能な変数</span></div>
+                <pre><code>{{project_name}}     - プロジェクト名
+{{project_dir}}      - プロジェクトディレクトリ
+{{app_spec}}         - アプリ仕様
+{{current_feature}}  - 現在のフィーチャー
+{{progress}}         - 進捗状況
+{{timestamp}}        - タイムスタンプ</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>UI設定</h2>
+            <p>Reactフロントエンドの設定ファイルです。</p>
+
+            <h3>vite.config.ts</h3>
+            <div class="code-block">
+                <div class="code-header"><span>Vite設定</span></div>
+                <pre><code>export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': 'http://localhost:8000',
+      '/ws': {
+        target: 'ws://localhost:8000',
+        ws: true,
+      },
+    },
+  },
+})</code></pre>
+            </div>
+
+            <h3>Tailwind CSS</h3>
+            <p>スタイリングはTailwind CSS v4を使用しています。カスタマイズは<code>tailwind.config.js</code>で行います。</p>
+        </section>
+
+        <section>
+            <h2>データベース設定</h2>
+
+            <h3>features.db</h3>
+            <p>各プロジェクトのSQLiteデータベースです。</p>
+            <div class="code-block">
+                <div class="code-header"><span>テーブル構造</span></div>
+                <pre><code>CREATE TABLE features (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    status TEXT DEFAULT 'pending',
+    priority TEXT DEFAULT 'medium',
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);</code></pre>
+            </div>
+
+            <h3>registry.db</h3>
+            <p>グローバルなプロジェクトレジストリです。</p>
+            <div class="code-block">
+                <div class="code-header"><span>テーブル構造</span></div>
+                <pre><code>CREATE TABLE projects (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    path TEXT UNIQUE,
+    type TEXT,
+    created_at TIMESTAMP,
+    last_accessed TIMESTAMP
+);</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>Webhook通知</h2>
+            <p>n8nなどのWebhookサービスと連携して進捗通知を受け取れます。</p>
+
+            <div class="code-block">
+                <div class="code-header"><span>.env</span></div>
+                <pre><code>PROGRESS_N8N_WEBHOOK_URL=https://your-n8n.example.com/webhook/autocoder</code></pre>
+            </div>
+
+            <h3>送信されるペイロード</h3>
+            <div class="code-block">
+                <div class="code-header"><span>JSON ペイロード</span></div>
+                <pre><code>{
+  "project": "my-project",
+  "event": "feature_completed",
+  "feature": {
+    "id": 15,
+    "title": "ユーザー認証の実装",
+    "status": "passing"
+  },
+  "progress": {
+    "completed": 15,
+    "total": 50,
+    "percentage": 30
+  },
+  "timestamp": "2024-01-15T10:30:00Z"
+}</code></pre>
+            </div>
+        </section>
+    </main>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>

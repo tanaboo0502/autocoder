@@ -111,6 +111,21 @@ export async function skipFeature(projectName: string, featureId: number): Promi
   })
 }
 
+export interface FeatureFileResponse {
+  found: boolean
+  path: string | null
+  filename: string | null
+  content: string | null
+  message?: string
+}
+
+export async function getFeatureFile(
+  projectName: string,
+  featureId: number
+): Promise<FeatureFileResponse> {
+  return fetchJSON(`/projects/${encodeURIComponent(projectName)}/features/${featureId}/file`)
+}
+
 // ============================================================================
 // Agent API
 // ============================================================================

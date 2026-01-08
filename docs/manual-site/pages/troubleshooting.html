@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>トラブルシューティング - AutoCoder マニュアル</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>AutoCoder</h1>
+            <p class="tagline">Build Anything, Autonomously</p>
+        </div>
+        <ul class="nav-links">
+            <li><a href="../index.html">ホーム</a></li>
+            <li><a href="getting-started.html">はじめに</a></li>
+            <li><a href="architecture.html">アーキテクチャ</a></li>
+            <li><a href="commands.html">コマンドリファレンス</a></li>
+            <li><a href="ui-guide.html">UIガイド</a></li>
+            <li><a href="configuration.html">設定</a></li>
+            <li><a href="agents.html">エージェント</a></li>
+            <li><a href="troubleshooting.html" class="active">トラブルシューティング</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <h1>トラブルシューティング</h1>
+            <p class="subtitle">よくある問題と解決方法</p>
+        </header>
+
+        <section>
+            <h2>起動時の問題</h2>
+
+            <div class="command-item">
+                <div class="command-name">問題: エージェントが起動しない</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> <code>./start.sh</code> を実行してもエージェントが開始しない
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    1. Python依存関係を確認:<br>
+                    <code>pip install -r requirements.txt</code><br><br>
+                    2. Claude Code CLIが認証されているか確認:<br>
+                    <code>claude auth</code><br><br>
+                    3. 権限を確認:<br>
+                    <code>chmod +x start.sh</code>
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">問題: UIが開かない</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> <code>./start_ui.sh</code> を実行してもブラウザが開かない
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    1. Node.js依存関係をインストール:<br>
+                    <code>cd ui && npm install</code><br><br>
+                    2. ポートが使用されていないか確認:<br>
+                    <code>lsof -i :5173</code><br>
+                    <code>lsof -i :8000</code><br><br>
+                    3. 手動でブラウザを開く:<br>
+                    <code>http://localhost:5173</code>
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">問題: "Permission denied" エラー</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> スクリプト実行時に権限エラーが発生
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    <code>chmod +x start.sh start_ui.sh</code>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>エージェントの問題</h2>
+
+            <div class="command-item">
+                <div class="command-name">問題: 初回セッションが長時間かかる</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> 最初のセッションが何も出力せずに長時間続く
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    これは正常な動作です。初期化エージェントが50-200+のテストケースを生成しています。<br>
+                    プロジェクトの複雑さによっては数分かかることがあります。<br><br>
+                    進捗を確認するには:<br>
+                    - UIのログビューアを確認<br>
+                    - <code>claude-progress.txt</code> を確認
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">問題: エージェントがスタックする</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> エージェントが進捗せず、同じ操作を繰り返す
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    1. <code>Ctrl+C</code> で中断<br><br>
+                    2. 再度起動して続行:<br>
+                    <code>./start.sh</code><br><br>
+                    3. 問題が続く場合、特定のフィーチャーをスキップ:<br>
+                    <code>feature_mark_failing(feature_id, "スキップ")</code>
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">問題: テストが常に失敗する</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> すべてのテストが失敗し、進捗しない
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    1. Playwright MCPが正しく設定されているか確認<br><br>
+                    2. YOLOモードでプロトタイプを作成:<br>
+                    <code>python start.py --yolo</code><br><br>
+                    3. テスト設定を確認:<br>
+                    <code>playwright.config.ts</code>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>UIの問題</h2>
+
+            <div class="command-item">
+                <div class="command-name">問題: WebSocket接続が切断される</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> UIにリアルタイム更新が反映されない
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    1. バックエンドサーバーが起動しているか確認:<br>
+                    <code>curl http://localhost:8000/health</code><br><br>
+                    2. ブラウザをリロード<br><br>
+                    3. ブラウザのコンソールでエラーを確認:<br>
+                    F12 → Console タブ
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">問題: カンバンボードが空</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> カンバンボードにフィーチャーが表示されない
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    1. プロジェクトが正しく選択されているか確認<br><br>
+                    2. <code>features.db</code> が存在するか確認:<br>
+                    <code>ls generations/your-project/features.db</code><br><br>
+                    3. 初期化エージェントを実行してフィーチャーを生成
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">問題: スタイルが崩れる</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> UIのレイアウトやスタイルが正しく表示されない
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    1. ブラウザのキャッシュをクリア<br><br>
+                    2. UIを再ビルド:<br>
+                    <code>cd ui && npm run build</code><br><br>
+                    3. 開発サーバーを再起動
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>データベースの問題</h2>
+
+            <div class="command-item">
+                <div class="command-name">問題: features.db が破損</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> SQLiteエラーが発生する
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    1. バックアップから復元（存在する場合）<br><br>
+                    2. データベースを再作成:<br>
+                    <code>rm features.db</code><br>
+                    <code>./start.sh</code>  # 初期化エージェントが再生成<br><br>
+                    <strong>注意:</strong> これにより進捗がリセットされます
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">問題: マイグレーションエラー</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> データベーススキーマの不整合
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    <code>python -c "from api.migration import migrate; migrate()"</code>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>セキュリティの問題</h2>
+
+            <div class="command-item">
+                <div class="command-name">問題: "Command not allowed" エラー</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> 特定のBashコマンドが実行できない
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    1. <code>security.py</code> の ALLOWED_COMMANDS を確認<br><br>
+                    2. 必要なコマンドを追加:<br>
+                    <code>ALLOWED_COMMANDS.add("your-command")</code><br><br>
+                    <strong>注意:</strong> セキュリティリスクを十分に検討してください
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">問題: ファイルアクセスが拒否される</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> プロジェクト外のファイルにアクセスできない
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    これはセキュリティ機能です。エージェントはプロジェクトディレクトリ内のファイルのみアクセスできます。<br><br>
+                    必要なファイルをプロジェクトディレクトリにコピーしてください。
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>パフォーマンスの問題</h2>
+
+            <div class="command-item">
+                <div class="command-name">問題: エージェントが遅い</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> タスクの実行に時間がかかる
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    1. ネットワーク接続を確認<br><br>
+                    2. 大きなフィーチャーを小さなタスクに分割<br><br>
+                    3. 並列実行を活用（独立したタスクの場合）<br><br>
+                    4. YOLOモードでプロトタイプを素早く作成
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">問題: メモリ使用量が高い</div>
+                <div class="command-desc">
+                    <strong>症状:</strong> システムが遅くなる、メモリ不足エラー
+                </div>
+                <div class="command-example">
+                    <strong>解決策:</strong><br>
+                    1. 長時間セッションを定期的に再起動<br><br>
+                    2. 不要なバックグラウンドプロセスを終了<br><br>
+                    3. ブラウザのタブを減らす
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>一般的なエラーメッセージ</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>エラー</th>
+                        <th>原因</th>
+                        <th>解決策</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ModuleNotFoundError</code></td>
+                        <td>依存関係が不足</td>
+                        <td><code>pip install -r requirements.txt</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>ConnectionRefused</code></td>
+                        <td>サーバーが起動していない</td>
+                        <td>バックエンドサーバーを起動</td>
+                    </tr>
+                    <tr>
+                        <td><code>SQLITE_BUSY</code></td>
+                        <td>データベースがロック中</td>
+                        <td>他のプロセスを終了して再試行</td>
+                    </tr>
+                    <tr>
+                        <td><code>AuthenticationError</code></td>
+                        <td>Claude認証が無効</td>
+                        <td><code>claude auth</code> で再認証</td>
+                    </tr>
+                    <tr>
+                        <td><code>TimeoutError</code></td>
+                        <td>API応答がタイムアウト</td>
+                        <td>ネットワークを確認、再試行</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>ログの確認方法</h2>
+
+            <h3>エージェントログ</h3>
+            <div class="code-block">
+                <div class="code-header"><span>ログファイル</span></div>
+                <pre><code># 進捗ログ
+cat claude-progress.txt
+
+# デバッグモードで実行
+DEBUG=true ./start.sh</code></pre>
+            </div>
+
+            <h3>サーバーログ</h3>
+            <div class="code-block">
+                <div class="code-header"><span>FastAPIログ</span></div>
+                <pre><code># ターミナルで確認（start_ui.sh実行時）
+# または
+tail -f server.log</code></pre>
+            </div>
+
+            <h3>ブラウザコンソール</h3>
+            <p>F12キーでデベロッパーツールを開き、Consoleタブを確認してください。</p>
+        </section>
+
+        <section>
+            <h2>サポートを得る</h2>
+            <div class="alert alert-info">
+                <strong>問題が解決しない場合:</strong>
+                <ul>
+                    <li>GitHubリポジトリでIssueを作成</li>
+                    <li>エラーメッセージとログを添付</li>
+                    <li>環境情報（OS、Python/Node.jsバージョン）を記載</li>
+                </ul>
+            </div>
+
+            <h3>報告時に含める情報</h3>
+            <div class="code-block">
+                <div class="code-header"><span>環境情報の収集</span></div>
+                <pre><code># Python バージョン
+python --version
+
+# Node.js バージョン
+node --version
+
+# OS 情報
+uname -a
+
+# 依存関係
+pip list | grep -E "claude|fastapi|sqlalchemy"</code></pre>
+            </div>
+        </section>
+    </main>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>エージェント - AutoCoder マニュアル</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>AutoCoder</h1>
+            <p class="tagline">Build Anything, Autonomously</p>
+        </div>
+        <ul class="nav-links">
+            <li><a href="../index.html">ホーム</a></li>
+            <li><a href="getting-started.html">はじめに</a></li>
+            <li><a href="architecture.html">アーキテクチャ</a></li>
+            <li><a href="commands.html">コマンドリファレンス</a></li>
+            <li><a href="ui-guide.html">UIガイド</a></li>
+            <li><a href="configuration.html">設定</a></li>
+            <li><a href="agents.html" class="active">エージェント</a></li>
+            <li><a href="troubleshooting.html">トラブルシューティング</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <h1>エージェント</h1>
+            <p class="subtitle">AutoCoderのエージェントシステムと動作原理</p>
+        </header>
+
+        <section>
+            <h2>2エージェントパターン</h2>
+            <p>AutoCoderはマルチセッション開発のために2つのエージェントを使用します。</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>初期化エージェント</h3>
+                    <p><strong>初回セッションで実行</strong></p>
+                    <ul>
+                        <li>アプリ仕様（app_spec.txt）を読み込み</li>
+                        <li>50-200+のテストケースを生成</li>
+                        <li>features.dbにフィーチャーを格納</li>
+                        <li>プロジェクト構造を初期化</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💻</div>
+                    <h3>コーディングエージェント</h3>
+                    <p><strong>以降のセッションで実行</strong></p>
+                    <ul>
+                        <li>feature_get_next()で次のフィーチャーを取得</li>
+                        <li>フィーチャーを1つずつ実装</li>
+                        <li>テストを実行（Playwright等）</li>
+                        <li>feature_mark_passing()で完了をマーク</li>
+                        <li>回帰テストを実行</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>エージェントライフサイクル</h2>
+            <div class="steps">
+                <div class="step">
+                    <h4>セッション開始</h4>
+                    <p><code>./start.sh</code> または UI からエージェントを起動</p>
+                </div>
+                <div class="step">
+                    <h4>状態チェック</h4>
+                    <p><code>features.db</code> の存在を確認。なければ初期化エージェント、あればコーディングエージェントを選択</p>
+                </div>
+                <div class="step">
+                    <h4>タスク実行</h4>
+                    <p>フィーチャーを取得し、実装、テスト、マークを繰り返す</p>
+                </div>
+                <div class="step">
+                    <h4>自動継続</h4>
+                    <p>3秒のディレイ後、次のフィーチャーへ自動的に進む</p>
+                </div>
+                <div class="step">
+                    <h4>完了/中断</h4>
+                    <p>全フィーチャー完了、または <code>Ctrl+C</code> で中断</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>オーケストレーターシステム</h2>
+            <p>タスクルーターがスマートにエージェントを選択・生成します。</p>
+
+            <h3>タスク分析プロセス</h3>
+            <ol>
+                <li><strong>スキル抽出:</strong> 入力タスクから必要なスキルを特定</li>
+                <li><strong>プールスキャン:</strong> 既存エージェント（specialized, integrated, elite）を検索</li>
+                <li><strong>カバレッジ計算:</strong> マッチ率を算出</li>
+                <li><strong>決定:</strong> カバレッジに基づいてアクションを選択</li>
+            </ol>
+
+            <h3>カバレッジベースの決定</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>カバレッジ</th>
+                        <th>アクション</th>
+                        <th>説明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>&lt; 60%</td>
+                        <td>新規生成</td>
+                        <td>必要なスキルを持つ新しいスペシャリストを生成</td>
+                    </tr>
+                    <tr>
+                        <td>60-90%</td>
+                        <td>統合</td>
+                        <td>複数の既存エージェントを組み合わせて統合エージェントを作成</td>
+                    </tr>
+                    <tr>
+                        <td>&gt; 90%</td>
+                        <td>既存使用</td>
+                        <td>最適な既存エージェントをそのまま使用</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>エージェントプール</h2>
+
+            <h3>Specialized エージェント</h3>
+            <p>単一のスキルに特化したエージェントです。</p>
+            <div class="code-block">
+                <div class="code-header"><span>場所: .claude/agents/pool/specialized/</span></div>
+                <pre><code># 例
+react-specialist.yaml
+python-backend.yaml
+playwright-tester.yaml
+documentation-writer.yaml</code></pre>
+            </div>
+
+            <h3>Integrated エージェント</h3>
+            <p>複数のスキルを組み合わせたエージェントです。</p>
+            <div class="code-block">
+                <div class="code-header"><span>場所: .claude/agents/pool/integrated/</span></div>
+                <pre><code># 例
+fullstack-developer.yaml  # React + Node.js + Database
+devops-engineer.yaml      # Docker + CI/CD + Deployment</code></pre>
+            </div>
+
+            <h3>Elite エージェント</h3>
+            <p>実績に基づいて昇格した高パフォーマンスエージェントです。</p>
+            <div class="code-block">
+                <div class="code-header"><span>場所: .claude/agents/pool/elite/</span></div>
+                <pre><code># 昇格条件
+- 使用回数: 5回以上
+- 成功率: 80%以上</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>エージェントマニフェスト</h2>
+            <p>各エージェントはYAML形式のマニフェストで定義されます。</p>
+
+            <div class="code-block">
+                <div class="code-header"><span>agent-manifest.yaml の例</span></div>
+                <pre><code>name: react-specialist
+version: 1.0.0
+description: Reactアプリケーション開発に特化したエージェント
+
+skills:
+  - react
+  - typescript
+  - tailwindcss
+  - vite
+
+capabilities:
+  - コンポーネント作成
+  - 状態管理
+  - フック実装
+  - スタイリング
+
+metrics:
+  usage_count: 12
+  success_rate: 0.92
+  last_used: 2024-01-15T10:30:00Z
+
+prompts:
+  system: |
+    あなたはReact専門の開発者です。
+    TypeScriptとTailwind CSSを使用します。
+    パフォーマンスとアクセシビリティを重視します。
+
+tools:
+  - file_operations
+  - npm_commands
+  - playwright_testing</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>エージェント進化</h2>
+            <p>エージェントは使用実績に基づいて自動的に進化します。</p>
+
+            <h3>メトリクス追跡</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>メトリクス</th>
+                        <th>説明</th>
+                        <th>影響</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>usage_count</td>
+                        <td>使用回数</td>
+                        <td>Elite昇格の条件</td>
+                    </tr>
+                    <tr>
+                        <td>success_rate</td>
+                        <td>タスク成功率</td>
+                        <td>Elite昇格の条件</td>
+                    </tr>
+                    <tr>
+                        <td>avg_completion_time</td>
+                        <td>平均完了時間</td>
+                        <td>効率性の指標</td>
+                    </tr>
+                    <tr>
+                        <td>skills</td>
+                        <td>スキルリスト</td>
+                        <td>タスクマッチングに使用</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Elite昇格プロセス</h3>
+            <div class="alert alert-success">
+                <strong>昇格条件:</strong>
+                <ul>
+                    <li>使用回数が5回以上</li>
+                    <li>成功率が80%以上</li>
+                </ul>
+                条件を満たすと、エージェントは自動的に<code>pool/elite/</code>に移動されます。
+            </div>
+        </section>
+
+        <section>
+            <h2>並列エージェント実行</h2>
+            <p>独立したタスクは複数のエージェントで並列実行できます。</p>
+
+            <h3>並列実行の条件</h3>
+            <ul>
+                <li>タスク間に依存関係がない</li>
+                <li>異なるファイル/リソースを操作する</li>
+                <li>競合するロックがない</li>
+            </ul>
+
+            <h3>WebSocket同期</h3>
+            <p>並列実行中の進捗はWebSocketでリアルタイムに同期されます。</p>
+            <div class="code-block">
+                <div class="code-header"><span>同期メッセージ例</span></div>
+                <pre><code>{
+  "type": "agent_progress",
+  "agent_id": "agent-001",
+  "task_id": "task-123",
+  "status": "in_progress",
+  "progress": 45,
+  "message": "コンポーネントを実装中..."
+}</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>カスタムエージェントの作成</h2>
+            <p>独自のエージェントを作成することも可能です。</p>
+
+            <div class="steps">
+                <div class="step">
+                    <h4>マニフェストを作成</h4>
+                    <p><code>.claude/agents/pool/specialized/</code>に新しいYAMLファイルを作成</p>
+                </div>
+                <div class="step">
+                    <h4>スキルを定義</h4>
+                    <p>エージェントが持つスキルをリストアップ</p>
+                </div>
+                <div class="step">
+                    <h4>プロンプトを設定</h4>
+                    <p>システムプロンプトでエージェントの振る舞いを定義</p>
+                </div>
+                <div class="step">
+                    <h4>テスト</h4>
+                    <p>タスクを実行してエージェントが正しく選択されることを確認</p>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header"><span>カスタムエージェントの例</span></div>
+                <pre><code>name: my-custom-agent
+version: 1.0.0
+description: カスタムタスク用のエージェント
+
+skills:
+  - my-skill-1
+  - my-skill-2
+
+capabilities:
+  - カスタム機能A
+  - カスタム機能B
+
+prompts:
+  system: |
+    あなたは[特定の分野]の専門家です。
+    [特定のルール]に従って作業します。
+    [特定の目標]を達成することを目指します。
+
+tools:
+  - file_operations
+  - bash_commands</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>YOLOモード</h2>
+            <p>テストをスキップして高速にプロトタイピングを行うモードです。</p>
+
+            <div class="alert alert-warning">
+                <strong>注意:</strong> YOLOモードではテストがスキップされるため、本番用コードには使用しないでください。
+            </div>
+
+            <h3>YOLOモードの起動</h3>
+            <div class="code-block">
+                <div class="code-header"><span>コマンド</span></div>
+                <pre><code>python start.py --yolo --project-dir ./generations/prototype</code></pre>
+            </div>
+
+            <h3>YOLOモードの動作</h3>
+            <ul>
+                <li>テスト実行をスキップ</li>
+                <li>feature_mark_passing()を自動呼び出し</li>
+                <li>高速なイテレーション</li>
+                <li>プロトタイピング向け</li>
+            </ul>
+        </section>
+    </main>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>

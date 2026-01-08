@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アーキテクチャ - AutoCoder マニュアル</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>AutoCoder</h1>
+            <p class="tagline">Build Anything, Autonomously</p>
+        </div>
+        <ul class="nav-links">
+            <li><a href="../index.html">ホーム</a></li>
+            <li><a href="getting-started.html">はじめに</a></li>
+            <li><a href="architecture.html" class="active">アーキテクチャ</a></li>
+            <li><a href="commands.html">コマンドリファレンス</a></li>
+            <li><a href="ui-guide.html">UIガイド</a></li>
+            <li><a href="configuration.html">設定</a></li>
+            <li><a href="agents.html">エージェント</a></li>
+            <li><a href="troubleshooting.html">トラブルシューティング</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <h1>アーキテクチャ</h1>
+            <p class="subtitle">AutoCoderのシステム構造と設計思想</p>
+        </header>
+
+        <section>
+            <h2>システム全体図</h2>
+            <div class="architecture-diagram">
+                <pre>
+┌─────────────────────────────────────────────────────────────────┐
+│                      ユーザーインターフェース                      │
+├─────────────────────────────────────────────────────────────────┤
+│  ターミナル (Claude Code CLI)    │      ブラウザ (React UI)      │
+│  - /task コマンド                │      - カンバンボード          │
+│  - /status クエリ                │      - エージェント制御        │
+│  - /create-spec 対話型           │      - リアルタイム進捗        │
+├─────────────────────────────────────────────────────────────────┤
+│                   オーケストレーション層                          │
+│  - タスクルーター (タイプ自動検出)                                │
+│  - エージェントセレクター/ジェネレーター                          │
+│  - フィーチャーマネージャー (SQLiteベース)                        │
+├─────────────────────────────────────────────────────────────────┤
+│                    バックエンドサービス                           │
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐    │
+│  │Claude Agent │  │  FastAPI     │  │   MCP Server        │    │
+│  │    SDK      │  │  Server      │  │  (Feature Tools)    │    │
+│  └─────────────┘  └──────────────┘  └─────────────────────┘    │
+├─────────────────────────────────────────────────────────────────┤
+│                     データ層                                     │
+│  SQLite (features.db) + Project Registry + Git                  │
+└─────────────────────────────────────────────────────────────────┘
+                </pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>3つの主要サブシステム</h2>
+
+            <h3>A. AutoCoder - 自律型アプリケーション開発</h3>
+            <div class="feature-card" style="margin-bottom: 1.5rem;">
+                <h4>2エージェントパターン</h4>
+                <ul>
+                    <li><strong>初期化エージェント</strong>（初回セッション）: アプリ仕様を読み取り、50-200+のテストケースを生成し、<code>features.db</code>に格納</li>
+                    <li><strong>コーディングエージェント</strong>（以降のセッション）: フィーチャーを1つずつ実装し、テストを実行し、パスしたフィーチャーをマーク</li>
+                </ul>
+            </div>
+
+            <h3>B. 自律オーケストレーション・エコシステム - マルチエージェントタスクルーター</h3>
+            <div class="feature-card" style="margin-bottom: 1.5rem;">
+                <h4>スマートタスクルーティング</h4>
+                <ul>
+                    <li>入力タスクを分析して必要なスキルを抽出</li>
+                    <li>既存のエージェントプール（特化型、統合型、エリート型）をスキャン</li>
+                    <li>カバレッジ率を計算（&lt; 60% = 新規, 60-90% = 統合, &gt; 90% = 既存）</li>
+                    <li>不足しているスペシャリストを自動生成または複数エージェントを統合</li>
+                </ul>
+            </div>
+
+            <h3>C. Autocoder UI - リアルタイムモニタリングダッシュボード</h3>
+            <div class="feature-card" style="margin-bottom: 1.5rem;">
+                <h4>React 18 + TypeScript + Tailwind CSS v4</h4>
+                <ul>
+                    <li><strong>カンバンボード:</strong> Pending → In Progress → Done</li>
+                    <li><strong>エージェント制御:</strong> 開始/一時停止/停止/再開</li>
+                    <li><strong>リアルタイムログストリーミング</strong></li>
+                    <li><strong>アシスタントチャットパネル</strong></li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>ディレクトリ構造</h2>
+            <div class="code-block">
+                <div class="code-header"><span>プロジェクト構造</span></div>
+                <pre><code>/Users/hiroyuki/autocoder2/
+├── .claude/                                # Claude Code統合
+│   ├── commands/
+│   │   ├── task.md                        # メイン /task コマンド
+│   │   ├── create-spec.md                 # 対話型仕様作成
+│   │   └── checkpoint.md
+│   ├── agents/
+│   │   ├── orchestrator.md                # エージェント選択ロジック
+│   │   └── pool/                          # エージェントリポジトリ
+│   │       ├── specialized/               # 単一スキルエージェント
+│   │       ├── integrated/                # 複合スキルエージェント
+│   │       └── elite/                     # 高パフォーマンスエージェント
+│   └── templates/
+│       ├── coding_prompt.template.md
+│       ├── coding_prompt_yolo.template.md
+│       └── initializer_prompt.template.md
+│
+├── autocoder/                              # メインアプリケーションルート
+│   ├── start.py                           # CLIランチャー
+│   ├── start_ui.py                        # FastAPIサーバーランチャー
+│   ├── autonomous_agent_demo.py           # エージェントエントリーポイント
+│   ├── agent.py                           # エージェントセッションループ
+│   ├── client.py                          # Claude SDKセットアップ
+│   ├── security.py                        # Bashコマンド許可リスト
+│   ├── prompts.py                         # プロンプトテンプレート
+│   ├── progress.py                        # 進捗追跡
+│   ├── registry.py                        # プロジェクトレジストリ
+│   │
+│   ├── api/                               # データベース層
+│   │   ├── database.py                    # SQLAlchemyモデル
+│   │   └── migration.py                   # JSON→SQLite移行
+│   │
+│   ├── mcp_server/                        # MCPプロトコルサーバー
+│   │   └── feature_mcp.py                 # フィーチャー管理ツール
+│   │
+│   ├── server/                            # FastAPIバックエンド
+│   │   ├── main.py                        # FastAPIアプリセットアップ
+│   │   ├── schemas.py                     # Pydanticモデル
+│   │   ├── websocket.py                   # リアルタイム更新
+│   │   └── routers/                       # APIルーター
+│   │
+│   ├── ui/                                # Reactフロントエンド
+│   │   └── src/
+│   │       ├── App.tsx                    # メインアプリ
+│   │       ├── components/                # Reactコンポーネント
+│   │       ├── hooks/                     # カスタムフック
+│   │       └── lib/                       # ユーティリティ
+│   │
+│   └── generations/                       # 生成されたプロジェクト
+│       └── my-project/
+│           ├── features.db                # SQLite進捗トラッカー
+│           └── prompts/
+│               └── app_spec.txt           # XML仕様</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>技術スタック</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>レイヤー</th>
+                        <th>技術</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>言語</td>
+                        <td>Python 3（バックエンド）, TypeScript（フロントエンド）</td>
+                    </tr>
+                    <tr>
+                        <td>エージェントフレームワーク</td>
+                        <td>Claude Agent SDK (Anthropic)</td>
+                    </tr>
+                    <tr>
+                        <td>バックエンドサーバー</td>
+                        <td>FastAPI + Uvicorn</td>
+                    </tr>
+                    <tr>
+                        <td>リアルタイム通信</td>
+                        <td>WebSocket + JSON</td>
+                    </tr>
+                    <tr>
+                        <td>MCPプロトコル</td>
+                        <td>フィーチャー管理ツール用</td>
+                    </tr>
+                    <tr>
+                        <td>フロントエンド</td>
+                        <td>React 18 + TypeScript</td>
+                    </tr>
+                    <tr>
+                        <td>UIコンポーネント</td>
+                        <td>Radix UI + カスタムコンポーネント</td>
+                    </tr>
+                    <tr>
+                        <td>スタイリング</td>
+                        <td>Tailwind CSS v4 (Neobrutalism)</td>
+                    </tr>
+                    <tr>
+                        <td>データフェッチング</td>
+                        <td>TanStack Query (React Query)</td>
+                    </tr>
+                    <tr>
+                        <td>データベース</td>
+                        <td>SQLite + SQLAlchemy ORM</td>
+                    </tr>
+                    <tr>
+                        <td>テスト</td>
+                        <td>Playwright MCP（ブラウザ自動化）</td>
+                    </tr>
+                    <tr>
+                        <td>ビルドツール</td>
+                        <td>Vite</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>セキュリティモデル</h2>
+            <div class="alert alert-warning">
+                <strong>3層防御システム</strong>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>OS レベル サンドボックス</h3>
+                    <p>Bashコマンドは隔離された環境で実行されます</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📁</div>
+                    <h3>ファイルシステム制限</h3>
+                    <p>アクセスはプロジェクトディレクトリのみに制限されます</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>コマンド許可リスト</h3>
+                    <p><code>security.py</code>で定義されたコマンドのみ実行可能</p>
+                </div>
+            </div>
+
+            <h3>許可されたコマンド</h3>
+            <div class="code-block">
+                <div class="code-header"><span>security.py - ALLOWED_COMMANDS</span></div>
+                <pre><code># ファイル操作
+ls, cat, head, tail, cp, mkdir, mv, rm, touch
+
+# Node.js
+npm, npx, pnpm, node
+
+# バージョン管理
+git
+
+# コンテナ
+docker
+
+# ネットワーク
+curl
+
+# 追加検証が必要
+pkill, chmod, init.sh</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>データフロー</h2>
+            <div class="steps">
+                <div class="step">
+                    <h4>タスク入力</h4>
+                    <p>ユーザーが <code>/task</code> コマンドでタスクを入力</p>
+                </div>
+                <div class="step">
+                    <h4>タスク分類</h4>
+                    <p>オーケストレーターがタスクタイプを自動検出（計画、実装、レビュー等）</p>
+                </div>
+                <div class="step">
+                    <h4>エージェント選択</h4>
+                    <p>スキルマッチングにより最適なエージェントを選択または生成</p>
+                </div>
+                <div class="step">
+                    <h4>実行</h4>
+                    <p>エージェントがタスクを実行し、<code>features.db</code>を更新</p>
+                </div>
+                <div class="step">
+                    <h4>UI同期</h4>
+                    <p>WebSocketで進捗がリアルタイムにUIに反映</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>エージェント進化</h2>
+            <p>エージェントは使用実績に基づいて自動的に「エリート」ステータスに昇格します。</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>指標</th>
+                        <th>エリート昇格条件</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>使用回数</td>
+                        <td>5回以上</td>
+                    </tr>
+                    <tr>
+                        <td>成功率</td>
+                        <td>80%以上</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>エージェントの指標は使用ごとに追跡され、マニフェストはYAML形式で保存されます。</p>
+        </section>
+    </main>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>

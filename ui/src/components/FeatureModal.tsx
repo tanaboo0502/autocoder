@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { X, CheckCircle2, Circle, SkipForward, Trash2, Loader2, AlertCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X, CheckCircle2, Circle, SkipForward, Trash2, Loader2, AlertCircle, FileText, ChevronDown, ChevronUp } from 'lucide-react'
 import { useSkipFeature, useDeleteFeature } from '../hooks/useProjects'
+import { getFeatureFile, type FeatureFileResponse } from '../lib/api'
 import type { Feature } from '../lib/types'
 
 interface FeatureModalProps {
@@ -12,9 +13,23 @@ interface FeatureModalProps {
 export function FeatureModal({ feature, projectName, onClose }: FeatureModalProps) {
   const [error, setError] = useState<string | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [fileData, setFileData] = useState<FeatureFileResponse | null>(null)
+  const [loadingFile, setLoadingFile] = useState(false)
+  const [showFileContent, setShowFileContent] = useState(false)
 
   const skipFeature = useSkipFeature(projectName)
   const deleteFeature = useDeleteFeature(projectName)
+
+  // Load file content when feature is completed
+  useEffect(() => {
+    if (feature.passes) {
+      setLoadingFile(true)
+      getFeatureFile(projectName, feature.id)
+        .then(setFileData)
+        .catch(() => setFileData(null))
+        .finally(() => setLoadingFile(false))
+    }
+  }, [feature.passes, feature.id, projectName])
 
   const handleSkip = async () => {
     setError(null)
@@ -124,6 +139,46 @@ export function FeatureModal({ feature, projectName, onClose }: FeatureModalProp
                   </li>
                 ))}
               </ol>
+            </div>
+          )}
+
+          {/* Generated File Content (for completed features) */}
+          {feature.passes && (
+            <div>
+              <h3 className="font-display font-bold mb-2 uppercase text-sm">
+                Generated File
+              </h3>
+              {loadingFile ? (
+                <div className="flex items-center gap-2 p-4 bg-[var(--color-neo-bg)] border-3 border-[var(--color-neo-border)]">
+                  <Loader2 size={18} className="animate-spin" />
+                  <span>Loading file...</span>
+                </div>
+              ) : fileData?.found ? (
+                <div className="border-3 border-[var(--color-neo-border)]">
+                  <button
+                    onClick={() => setShowFileContent(!showFileContent)}
+                    className="w-full flex items-center justify-between p-4 bg-[var(--color-neo-done)] text-white hover:brightness-110 transition-all"
+                  >
+                    <div className="flex items-center gap-2">
+                      <FileText size={18} />
+                      <span className="font-bold">{fileData.filename}</span>
+                    </div>
+                    {showFileContent ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  </button>
+                  {showFileContent && (
+                    <div className="p-4 bg-[var(--color-neo-bg)] max-h-96 overflow-y-auto">
+                      <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                        {fileData.content}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 p-4 bg-[var(--color-neo-bg)] border-3 border-[var(--color-neo-border)] text-[var(--color-neo-text-secondary)]">
+                  <FileText size={18} />
+                  <span>No file found for this feature</span>
+                </div>
+              )}
             </div>
           )}
         </div>

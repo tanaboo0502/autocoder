@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIガイド - AutoCoder マニュアル</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>AutoCoder</h1>
+            <p class="tagline">Build Anything, Autonomously</p>
+        </div>
+        <ul class="nav-links">
+            <li><a href="../index.html">ホーム</a></li>
+            <li><a href="getting-started.html">はじめに</a></li>
+            <li><a href="architecture.html">アーキテクチャ</a></li>
+            <li><a href="commands.html">コマンドリファレンス</a></li>
+            <li><a href="ui-guide.html" class="active">UIガイド</a></li>
+            <li><a href="configuration.html">設定</a></li>
+            <li><a href="agents.html">エージェント</a></li>
+            <li><a href="troubleshooting.html">トラブルシューティング</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <h1>UIガイド</h1>
+            <p class="subtitle">ブラウザベースのダッシュボードの使い方</p>
+        </header>
+
+        <section>
+            <h2>UI起動方法</h2>
+            <div class="code-block">
+                <div class="code-header"><span>UIサーバーを起動</span></div>
+                <pre><code>cd /Users/hiroyuki/autocoder2/autocoder
+./start_ui.sh</code></pre>
+            </div>
+            <p>ブラウザで <code>http://localhost:5173</code> が自動的に開きます。</p>
+            <div class="alert alert-info">
+                <strong>ポート情報:</strong>
+                <ul>
+                    <li>FastAPI バックエンド: <code>localhost:8000</code></li>
+                    <li>React フロントエンド: <code>localhost:5173</code></li>
+                    <li>WebSocket: <code>ws://localhost:8000/ws</code></li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>ダッシュボード概要</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📋</div>
+                    <h3>カンバンボード</h3>
+                    <p>フィーチャーの進捗を視覚的に管理。Pending → In Progress → Done</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎛️</div>
+                    <h3>エージェント制御</h3>
+                    <p>開始、一時停止、停止、再開をワンクリックで操作</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📁</div>
+                    <h3>プロジェクトブラウザ</h3>
+                    <p>フォルダを選択してプロジェクトを切り替え</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>アシスタントチャット</h3>
+                    <p>統合されたClaudeアシスタントと対話</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>ログストリーミング</h3>
+                    <p>エージェントの出力をリアルタイムで表示</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3>仕様作成ウィザード</h3>
+                    <p>対話型フォームでアプリ仕様を作成</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>カンバンボード</h2>
+            <p>プロジェクトの全フィーチャーを3つのカラムで管理します。</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>カラム</th>
+                        <th>説明</th>
+                        <th>カードの色</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Pending</strong></td>
+                        <td>未着手のフィーチャー</td>
+                        <td>グレー</td>
+                    </tr>
+                    <tr>
+                        <td><strong>In Progress</strong></td>
+                        <td>現在実装中のフィーチャー</td>
+                        <td>ブルー</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Done</strong></td>
+                        <td>テスト合格したフィーチャー</td>
+                        <td>グリーン</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>フィーチャーカード</h3>
+            <p>各カードには以下の情報が表示されます：</p>
+            <ul>
+                <li><strong>ID:</strong> フィーチャーの一意識別子</li>
+                <li><strong>タイトル:</strong> フィーチャーの短い説明</li>
+                <li><strong>優先度:</strong> High / Medium / Low</li>
+                <li><strong>ステータス:</strong> pending / in_progress / passing / failing</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>エージェント制御パネル</h2>
+            <p>エージェントの実行を制御するボタンが用意されています。</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ボタン</th>
+                        <th>動作</th>
+                        <th>使用シーン</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>▶️ Start</td>
+                        <td>エージェントを開始</td>
+                        <td>新規セッション開始時</td>
+                    </tr>
+                    <tr>
+                        <td>⏸️ Pause</td>
+                        <td>エージェントを一時停止</td>
+                        <td>進捗を確認したい時</td>
+                    </tr>
+                    <tr>
+                        <td>⏹️ Stop</td>
+                        <td>エージェントを完全停止</td>
+                        <td>セッションを終了する時</td>
+                    </tr>
+                    <tr>
+                        <td>🔄 Resume</td>
+                        <td>一時停止から再開</td>
+                        <td>確認後に続行する時</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="alert alert-warning">
+                <strong>注意:</strong> エージェントを停止しても、<code>features.db</code>の進捗は保存されています。次回起動時に中断箇所から再開できます。
+            </div>
+        </section>
+
+        <section>
+            <h2>プロジェクトセレクター</h2>
+            <p>左サイドバーからプロジェクトを選択・切り替えできます。</p>
+
+            <h3>新規プロジェクト作成</h3>
+            <ol>
+                <li>「+ New Project」ボタンをクリック</li>
+                <li>プロジェクト名を入力</li>
+                <li>プロジェクトタイプを選択（Web App, Book, API など）</li>
+                <li>「Create」をクリック</li>
+            </ol>
+
+            <h3>既存プロジェクトを開く</h3>
+            <ol>
+                <li>「Open Folder」ボタンをクリック</li>
+                <li>ファイルブラウザでフォルダを選択</li>
+                <li><code>features.db</code>が検出されると自動読み込み</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>仕様作成チャット</h2>
+            <p>対話形式でアプリケーション仕様を作成します。</p>
+
+            <div class="steps">
+                <div class="step">
+                    <h4>プロジェクト概要</h4>
+                    <p>作りたいものの説明を入力</p>
+                </div>
+                <div class="step">
+                    <h4>対象ユーザー</h4>
+                    <p>誰が使うアプリか指定</p>
+                </div>
+                <div class="step">
+                    <h4>主要機能</h4>
+                    <p>必須の機能をリストアップ</p>
+                </div>
+                <div class="step">
+                    <h4>技術スタック</h4>
+                    <p>使用する技術を選択（または自動推奨）</p>
+                </div>
+                <div class="step">
+                    <h4>仕様生成</h4>
+                    <p><code>app_spec.txt</code>が自動生成され、フィーチャーがカンバンに追加</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>アシスタントチャットパネル</h2>
+            <p>右サイドバーに統合されたClaudeアシスタントです。</p>
+
+            <h3>使用例</h3>
+            <ul>
+                <li>「このエラーの意味は？」- エラーメッセージを貼り付けて質問</li>
+                <li>「ReactでStateを使う方法は？」- 技術的な質問</li>
+                <li>「このコードをリファクタリングして」- コード改善の相談</li>
+                <li>「次に何をすべき？」- 進め方のアドバイス</li>
+            </ul>
+
+            <div class="alert alert-info">
+                <strong>ヒント:</strong> アシスタントはプロジェクトのコンテキストを理解しているため、具体的な質問が可能です。
+            </div>
+        </section>
+
+        <section>
+            <h2>ログビューア</h2>
+            <p>エージェントの出力をリアルタイムで確認できます。</p>
+
+            <h3>ログレベル</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>レベル</th>
+                        <th>色</th>
+                        <th>内容</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>INFO</td>
+                        <td>ブルー</td>
+                        <td>一般的な情報</td>
+                    </tr>
+                    <tr>
+                        <td>SUCCESS</td>
+                        <td>グリーン</td>
+                        <td>成功したアクション</td>
+                    </tr>
+                    <tr>
+                        <td>WARNING</td>
+                        <td>イエロー</td>
+                        <td>警告メッセージ</td>
+                    </tr>
+                    <tr>
+                        <td>ERROR</td>
+                        <td>レッド</td>
+                        <td>エラーメッセージ</td>
+                    </tr>
+                    <tr>
+                        <td>DEBUG</td>
+                        <td>グレー</td>
+                        <td>デバッグ情報（詳細モード）</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>フィルタリング</h3>
+            <ul>
+                <li>ログレベルでフィルタ</li>
+                <li>キーワード検索</li>
+                <li>タイムスタンプでソート</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>WebSocket接続</h2>
+            <p>UIはWebSocketを使用してバックエンドとリアルタイム同期しています。</p>
+
+            <h3>接続ステータス</h3>
+            <ul>
+                <li><span style="color: var(--accent-green);">●</span> Connected - 正常に接続中</li>
+                <li><span style="color: var(--accent-yellow);">●</span> Reconnecting - 再接続試行中</li>
+                <li><span style="color: var(--accent-red);">●</span> Disconnected - 切断状態</li>
+            </ul>
+
+            <div class="alert alert-warning">
+                <strong>接続が切れた場合:</strong> ページをリロードするか、サーバーが起動しているか確認してください。
+            </div>
+        </section>
+
+        <section>
+            <h2>レスポンシブデザイン</h2>
+            <p>UIはモバイル・タブレット・デスクトップに対応しています。</p>
+            <ul>
+                <li><strong>デスクトップ:</strong> フル機能のダッシュボード</li>
+                <li><strong>タブレット:</strong> 折りたたみ可能なサイドバー</li>
+                <li><strong>モバイル:</strong> シンプル化されたビュー</li>
+            </ul>
+        </section>
+    </main>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>

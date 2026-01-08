@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コマンドリファレンス - AutoCoder マニュアル</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>AutoCoder</h1>
+            <p class="tagline">Build Anything, Autonomously</p>
+        </div>
+        <ul class="nav-links">
+            <li><a href="../index.html">ホーム</a></li>
+            <li><a href="getting-started.html">はじめに</a></li>
+            <li><a href="architecture.html">アーキテクチャ</a></li>
+            <li><a href="commands.html" class="active">コマンドリファレンス</a></li>
+            <li><a href="ui-guide.html">UIガイド</a></li>
+            <li><a href="configuration.html">設定</a></li>
+            <li><a href="agents.html">エージェント</a></li>
+            <li><a href="troubleshooting.html">トラブルシューティング</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <h1>コマンドリファレンス</h1>
+            <p class="subtitle">AutoCoderで使用できるすべてのコマンド</p>
+        </header>
+
+        <section>
+            <h2>主要コマンド</h2>
+
+            <div class="command-item">
+                <div class="command-name">/task [説明]</div>
+                <div class="command-desc">
+                    タスクを実行します。最も頻繁に使用するコマンドです。
+                    タスクタイプは自動検出され、適切なエージェントが選択されます。
+                </div>
+                <div class="command-example">
+                    <strong>例:</strong><br>
+                    /task Reactでtodoアプリを作成<br>
+                    /task 第1章を書く<br>
+                    /task APIエンドポイントを追加<br>
+                    /task バグを修正<br>
+                    /task コードをレビュー
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">/status</div>
+                <div class="command-desc">
+                    現在のプロジェクトの進捗状況を表示します。
+                    完了したフィーチャー数、残りのフィーチャー数、完了率を確認できます。
+                </div>
+                <div class="command-example">
+                    <strong>出力例:</strong><br>
+                    15/50 features completed (30%)
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">/create-spec</div>
+                <div class="command-desc">
+                    対話型のアプリケーション仕様作成ウィザードを起動します。
+                    質問に答えることで、詳細な仕様書が自動生成されます。
+                </div>
+                <div class="command-example">
+                    <strong>フロー:</strong><br>
+                    Q1: 何を作りたいですか？<br>
+                    Q2: 対象ユーザーは？<br>
+                    Q3: 主要機能は？<br>
+                    → app_spec.txt が生成されます
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">/checkpoint</div>
+                <div class="command-desc">
+                    現在の進捗を保存し、チェックポイントを作成します。
+                    長時間タスクの途中で安全に中断できます。
+                </div>
+                <div class="command-example">
+                    /checkpoint "第3章まで完了"
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>タスクタイプ</h2>
+            <p><code>/task</code> コマンドは入力内容に基づいてタスクタイプを自動検出します。</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>タイプ</th>
+                        <th>検出キーワード</th>
+                        <th>動作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>計画</td>
+                        <td>作成、新規、設計</td>
+                        <td>対話型Q&A → フィーチャー生成</td>
+                    </tr>
+                    <tr>
+                        <td>実装</td>
+                        <td>書く、実装、追加</td>
+                        <td>次のフィーチャーを実装</td>
+                    </tr>
+                    <tr>
+                        <td>修正</td>
+                        <td>修正、バグ、エラー</td>
+                        <td>問題を特定して修正</td>
+                    </tr>
+                    <tr>
+                        <td>レビュー</td>
+                        <td>レビュー、確認、チェック</td>
+                        <td>コード品質を評価</td>
+                    </tr>
+                    <tr>
+                        <td>デプロイ</td>
+                        <td>デプロイ、公開、リリース</td>
+                        <td>本番環境への展開</td>
+                    </tr>
+                    <tr>
+                        <td>テスト</td>
+                        <td>テスト、検証</td>
+                        <td>テストを実行</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>MCP フィーチャーツール</h2>
+            <p>内部的に使用されるMCPサーバーのツールです。直接呼び出すことも可能です。</p>
+
+            <div class="command-item">
+                <div class="command-name">feature_get_next()</div>
+                <div class="command-desc">
+                    次に実装すべきフィーチャーを取得します。
+                    優先度に基づいて選択されます。
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">feature_mark_passing(feature_id)</div>
+                <div class="command-desc">
+                    フィーチャーをテスト合格としてマークします。
+                    カンバンボードで「Done」に移動します。
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">feature_mark_failing(feature_id, reason)</div>
+                <div class="command-desc">
+                    フィーチャーをテスト失敗としてマークし、理由を記録します。
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">feature_create_bulk(features)</div>
+                <div class="command-desc">
+                    複数のフィーチャーを一括作成します。
+                    初期化エージェントが使用します。
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">feature_list()</div>
+                <div class="command-desc">
+                    すべてのフィーチャーとそのステータスを一覧表示します。
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">feature_get_random_passing()</div>
+                <div class="command-desc">
+                    回帰テスト用にランダムなパス済みフィーチャーを取得します。
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>CLIスクリプト</h2>
+
+            <div class="command-item">
+                <div class="command-name">./start.sh</div>
+                <div class="command-desc">
+                    AutoCoderエージェントをCLIモードで起動します。
+                </div>
+                <div class="command-example">
+                    cd /Users/hiroyuki/autocoder2/autocoder<br>
+                    ./start.sh
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">./start_ui.sh</div>
+                <div class="command-desc">
+                    FastAPIサーバーとReact UIを起動します。
+                    ブラウザで http://localhost:5173 が開きます。
+                </div>
+                <div class="command-example">
+                    cd /Users/hiroyuki/autocoder2/autocoder<br>
+                    ./start_ui.sh
+                </div>
+            </div>
+
+            <div class="command-item">
+                <div class="command-name">python start.py [options]</div>
+                <div class="command-desc">
+                    オプション付きでエージェントを起動します。
+                </div>
+                <div class="command-example">
+                    <strong>オプション:</strong><br>
+                    --project-dir PATH : プロジェクトディレクトリを指定<br>
+                    --yolo : YOLOモード（テストをスキップ）<br>
+                    --max-iterations N : 最大イテレーション数
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>使用例</h2>
+
+            <h3>新規プロジェクト作成</h3>
+            <div class="code-block">
+                <div class="code-header"><span>Webアプリ作成</span></div>
+                <pre><code># プロジェクトディレクトリで開始
+cd generations/my-new-app
+claude
+
+# 仕様を対話的に作成
+/create-spec
+
+# または直接タスクを実行
+/task ReactとTypeScriptでeコマースサイトを作成</code></pre>
+            </div>
+
+            <h3>既存プロジェクトの続行</h3>
+            <div class="code-block">
+                <div class="code-header"><span>セッション再開</span></div>
+                <pre><code># 前回のセッションを再開
+cd generations/my-existing-project
+claude
+
+# 進捗を確認
+/status
+
+# 次のフィーチャーを実装
+/task 次のフィーチャーを実装</code></pre>
+            </div>
+
+            <h3>書籍・ドキュメント作成</h3>
+            <div class="code-block">
+                <div class="code-header"><span>書籍プロジェクト</span></div>
+                <pre><code># 書籍プロジェクトを開始
+/task 技術書「Pythonで学ぶAI」を作成
+
+# 章ごとに進める
+/task 第1章「はじめに」を書く
+/task 第2章「基礎」を書く
+
+# 進捗確認
+/status</code></pre>
+            </div>
+
+            <h3>YOLOモード（高速プロトタイピング）</h3>
+            <div class="code-block">
+                <div class="code-header"><span>テストをスキップ</span></div>
+                <pre><code># テストなしで高速に開発
+python start.py --yolo --project-dir ./generations/prototype</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>キーボードショートカット</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ショートカット</th>
+                        <th>動作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Ctrl+C</code></td>
+                        <td>現在のセッションを一時停止</td>
+                    </tr>
+                    <tr>
+                        <td><code>Ctrl+D</code></td>
+                        <td>Claude Codeを終了</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>

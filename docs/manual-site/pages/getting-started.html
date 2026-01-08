@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>はじめに - AutoCoder マニュアル</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>AutoCoder</h1>
+            <p class="tagline">Build Anything, Autonomously</p>
+        </div>
+        <ul class="nav-links">
+            <li><a href="../index.html">ホーム</a></li>
+            <li><a href="getting-started.html" class="active">はじめに</a></li>
+            <li><a href="architecture.html">アーキテクチャ</a></li>
+            <li><a href="commands.html">コマンドリファレンス</a></li>
+            <li><a href="ui-guide.html">UIガイド</a></li>
+            <li><a href="configuration.html">設定</a></li>
+            <li><a href="agents.html">エージェント</a></li>
+            <li><a href="troubleshooting.html">トラブルシューティング</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <h1>はじめに</h1>
+            <p class="subtitle">AutoCoderのインストールと基本的な使い方</p>
+        </header>
+
+        <section>
+            <h2>必要条件</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>要件</th>
+                        <th>バージョン</th>
+                        <th>備考</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Python</td>
+                        <td>3.10以上</td>
+                        <td>必須</td>
+                    </tr>
+                    <tr>
+                        <td>Node.js</td>
+                        <td>18以上</td>
+                        <td>UI使用時に必要</td>
+                    </tr>
+                    <tr>
+                        <td>Claude Code CLI</td>
+                        <td>最新版</td>
+                        <td>必須</td>
+                    </tr>
+                    <tr>
+                        <td>Git</td>
+                        <td>任意</td>
+                        <td>バージョン管理に推奨</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>インストール</h2>
+            <div class="steps">
+                <div class="step">
+                    <h4>リポジトリのクローン</h4>
+                    <div class="code-block">
+                        <div class="code-header"><span>ターミナル</span></div>
+                        <pre><code>git clone https://github.com/your-repo/autocoder2.git
+cd autocoder2</code></pre>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h4>Python依存関係のインストール</h4>
+                    <div class="code-block">
+                        <div class="code-header"><span>ターミナル</span></div>
+                        <pre><code>cd autocoder
+pip install -r requirements.txt</code></pre>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h4>UI依存関係のインストール（オプション）</h4>
+                    <div class="code-block">
+                        <div class="code-header"><span>ターミナル</span></div>
+                        <pre><code>cd ui
+npm install</code></pre>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h4>Claude Code CLIの設定</h4>
+                    <p>Claude Code CLIがインストールされ、認証されていることを確認してください。</p>
+                    <div class="code-block">
+                        <div class="code-header"><span>ターミナル</span></div>
+                        <pre><code>claude --version
+claude auth</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>クイックスタート</h2>
+
+            <h3>方法1: UIを使った開発（推奨）</h3>
+            <div class="alert alert-info">
+                <strong>推奨:</strong> 2つのターミナルを使用することで、リアルタイムの進捗確認が可能です。
+            </div>
+
+            <div class="code-block">
+                <div class="code-header"><span>ターミナル1: UIサーバー起動</span></div>
+                <pre><code>cd /Users/hiroyuki/autocoder2/autocoder
+./start_ui.sh</code></pre>
+            </div>
+
+            <p>ブラウザで <code>http://localhost:5173</code> が自動的に開きます。</p>
+
+            <div class="code-block">
+                <div class="code-header"><span>ターミナル2: タスク実行</span></div>
+                <pre><code># プロジェクトディレクトリに移動
+cd /Users/hiroyuki/autocoder2/autocoder/generations/my-project
+
+# Claude Codeを起動
+claude
+
+# タスクを実行
+/task Reactでシンプルなtodoアプリを作成</code></pre>
+            </div>
+
+            <h3>方法2: CLIのみで開発</h3>
+            <div class="code-block">
+                <div class="code-header"><span>ターミナル</span></div>
+                <pre><code>cd /Users/hiroyuki/autocoder2/autocoder
+./start.sh</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>基本的なワークフロー</h2>
+
+            <h3>フェーズ1: プロジェクト作成</h3>
+            <div class="code-block">
+                <div class="code-header"><span>コマンド例</span></div>
+                <pre><code>/task 新しいブログアプリを作成</code></pre>
+            </div>
+            <p>自動的に以下が実行されます：</p>
+            <ul>
+                <li>プロジェクトタイプの自動検出</li>
+                <li>ディレクトリ構造の作成</li>
+                <li>プロジェクトレジストリへの登録</li>
+                <li>UIでのブラウザ表示</li>
+            </ul>
+
+            <h3>フェーズ2: 計画（対話型）</h3>
+            <p>オーケストレーターが「計画」タイプを検出すると、対話型のQ&Aが開始されます：</p>
+            <ul>
+                <li>Q1: 何を作りたいですか？</li>
+                <li>Q2: 誰が使いますか？</li>
+                <li>Q3: 主要な機能は？</li>
+            </ul>
+            <p>並列リサーチタスク（市場、技術、競合）が実行され、フィーチャーがカンバンに表示されます。</p>
+
+            <h3>フェーズ3: 実装</h3>
+            <div class="code-block">
+                <div class="code-header"><span>コマンド例</span></div>
+                <pre><code>/task 第1章を書く</code></pre>
+            </div>
+            <p>実装フローは以下の通りです：</p>
+            <ol>
+                <li><code>feature_get_next()</code> で最優先フィーチャーを取得</li>
+                <li>フィーチャーを実装</li>
+                <li>テスト実行（UIアプリの場合はPlaywright）</li>
+                <li><code>feature_mark_passing()</code> でカンバンの「Done」に移動</li>
+                <li>以前のフィーチャーを回帰テスト</li>
+                <li>3秒後に次のフィーチャーへ自動継続</li>
+            </ol>
+
+            <h3>フェーズ4: モニタリング</h3>
+            <div class="code-block">
+                <div class="code-header"><span>進捗確認</span></div>
+                <pre><code>/status</code></pre>
+            </div>
+            <p>出力例: <code>X/Y features completed (Z%)</code></p>
+        </section>
+
+        <section>
+            <h2>セッション管理</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>操作</th>
+                        <th>方法</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>一時停止</td>
+                        <td><code>Ctrl+C</code> を押す</td>
+                    </tr>
+                    <tr>
+                        <td>再開</td>
+                        <td><code>./start.sh</code> を再実行（中断箇所から再開）</td>
+                    </tr>
+                    <tr>
+                        <td>新規プロジェクト</td>
+                        <td>初回セッションで <code>features.db</code> が自動作成（50-200+テストケース）</td>
+                    </tr>
+                    <tr>
+                        <td>継続セッション</td>
+                        <td>初期化をスキップし、直接コーディングを開始</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>プロジェクトの例</h2>
+            <div class="code-block">
+                <div class="code-header"><span>様々なタスク例</span></div>
+                <pre><code># Webアプリケーション
+/task Reactでeコマースサイトを作成
+
+# 書籍・ドキュメント
+/task 技術ブログの記事を書く
+
+# API開発
+/task RESTful APIをFastAPIで構築
+
+# CLI ツール
+/task ファイル整理CLIツールを作成
+
+# デプロイ
+/task Vercelにデプロイ
+
+# コードレビュー
+/task コードをレビュー</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>次のステップ</h2>
+            <ul>
+                <li><a href="architecture.html">アーキテクチャ</a> - システムの詳細な構造を理解する</li>
+                <li><a href="commands.html">コマンドリファレンス</a> - 利用可能な全コマンドを確認</li>
+                <li><a href="ui-guide.html">UIガイド</a> - ブラウザUIの使い方を学ぶ</li>
+            </ul>
+        </section>
+    </main>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>

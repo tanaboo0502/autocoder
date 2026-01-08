@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoCoder マニュアル</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>AutoCoder</h1>
+            <p class="tagline">Build Anything, Autonomously</p>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">ホーム</a></li>
+            <li><a href="pages/getting-started.html">はじめに</a></li>
+            <li><a href="pages/architecture.html">アーキテクチャ</a></li>
+            <li><a href="pages/commands.html">コマンドリファレンス</a></li>
+            <li><a href="pages/ui-guide.html">UIガイド</a></li>
+            <li><a href="pages/configuration.html">設定</a></li>
+            <li><a href="pages/agents.html">エージェント</a></li>
+            <li><a href="pages/troubleshooting.html">トラブルシューティング</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <h1>AutoCoder マニュアル</h1>
+            <p class="subtitle">自律型AIコーディング＆コンテンツ作成エージェントシステム</p>
+        </header>
+
+        <section class="hero">
+            <div class="hero-content">
+                <h2>AutoCoderとは？</h2>
+                <p>AutoCoderは、長時間実行可能な自律型AIコーディングおよびコンテンツ作成エージェントシステムです。最小限の人間の介入で、複数のセッションにわたって完全なアプリケーションを構築したり、コンテンツを作成したりできます。</p>
+            </div>
+        </section>
+
+        <section class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>2エージェントパターン</h3>
+                <p>初期化エージェントとコーディングエージェントの連携により、マルチセッション開発を実現</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>リアルタイムUI</h3>
+                <p>React製のカンバンボードで進捗をリアルタイムに可視化</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>自動継続</h3>
+                <p>セッション間で進捗を永続化し、中断したところから自動再開</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>スキルベースルーティング</h3>
+                <p>タスクに最適なエージェントを自動選択</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>3層セキュリティ</h3>
+                <p>OSサンドボックス、ファイル制限、コマンドホワイトリスト</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>YOLOモード</h3>
+                <p>テストをスキップした高速プロトタイピング</p>
+            </div>
+        </section>
+
+        <section class="quick-start">
+            <h2>クイックスタート</h2>
+            <div class="code-block">
+                <div class="code-header">
+                    <span>ターミナル1: UIを起動</span>
+                </div>
+                <pre><code>cd /Users/hiroyuki/autocoder2/autocoder
+./start_ui.sh
+# http://localhost:5173 でカンバンボードが開きます</code></pre>
+            </div>
+            <div class="code-block">
+                <div class="code-header">
+                    <span>ターミナル2: タスクを実行</span>
+                </div>
+                <pre><code>cd /Users/hiroyuki/autocoder2/autocoder/generations/my-project
+claude
+/task Reactでtodoアプリを作成</code></pre>
+            </div>
+        </section>
+
+        <section class="architecture-overview">
+            <h2>システム概要</h2>
+            <div class="architecture-diagram">
+                <pre>
+┌─────────────────────────────────────────────────────────────────┐
+│                      ユーザーインターフェース                      │
+├─────────────────────────────────────────────────────────────────┤
+│  ターミナル (Claude Code CLI)    │      ブラウザ (React UI)      │
+│  - /task コマンド                │      - カンバンボード          │
+│  - /status クエリ                │      - エージェント制御        │
+│  - /create-spec 対話型           │      - リアルタイム進捗        │
+├─────────────────────────────────────────────────────────────────┤
+│                   オーケストレーション層                          │
+│  - タスクルーター (タイプ自動検出)                                │
+│  - エージェントセレクター/ジェネレーター                          │
+│  - フィーチャーマネージャー (SQLiteベース)                        │
+├─────────────────────────────────────────────────────────────────┤
+│                    バックエンドサービス                           │
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐    │
+│  │Claude Agent │  │  FastAPI     │  │   MCP Server        │    │
+│  │    SDK      │  │  Server      │  │  (Feature Tools)    │    │
+│  └─────────────┘  └──────────────┘  └─────────────────────┘    │
+├─────────────────────────────────────────────────────────────────┤
+│                     データ層                                     │
+│  SQLite (features.db) + Project Registry + Git                  │
+└─────────────────────────────────────────────────────────────────┘
+                </pre>
+            </div>
+        </section>
+
+        <section class="project-types">
+            <h2>対応プロジェクトタイプ</h2>
+            <div class="types-grid">
+                <span class="type-tag">Webアプリ</span>
+                <span class="type-tag">モバイルアプリ</span>
+                <span class="type-tag">API</span>
+                <span class="type-tag">CLI</span>
+                <span class="type-tag">ライブラリ</span>
+                <span class="type-tag">ボット</span>
+                <span class="type-tag">書籍</span>
+                <span class="type-tag">ドキュメント</span>
+                <span class="type-tag">ゲーム</span>
+                <span class="type-tag">その他50+</span>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
