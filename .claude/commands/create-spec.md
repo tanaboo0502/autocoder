@@ -565,14 +565,14 @@ Replace `[X]` with their feature count.
 
 Start by greeting the user warmly. Ask ONLY the Phase 1 questions:
 
-> "Hi! I'm here to help you create a detailed specification for your app.
+> 「こんにちは！アプリの仕様を一緒に作りましょう。
 >
-> Let's start with the basics:
+> まず基本的なことを教えてください：
 >
-> 1. What do you want to call this project?
-> 2. In your own words, what are you building?
-> 3. Who will use it - just you, or others too?"
+> 1. **プロジェクト名**: このプロジェクトの名前は？
+> 2. **内容**: 何を作りますか？どんな問題を解決しますか？
+> 3. **ユーザー**: 誰が使いますか？」
 
-**STOP HERE and wait for their response.** Do not ask any other questions yet. Do not use AskUserQuestion yet. Just have a conversation about their project basics first.
+**ここで停止して回答を待つ。** 他の質問はまだしない。AskUserQuestionも使わない。まずは会話でプロジェクトの基本を聞く。
 
-After they respond, acknowledge what they said, then move to Phase 2.
+回答を受け取ったら、内容を確認してからPhase 2へ進む。

@@ -101,7 +101,8 @@ export function SpecCreationChat({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    // IME入力中（日本語変換中）は送信しない
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault()
       handleSendMessage()
     }
@@ -173,28 +174,28 @@ export function SpecCreationChat({
         return (
           <span className="flex items-center gap-1 text-xs text-[var(--color-neo-done)]">
             <Wifi size={12} />
-            Connected
+            接続中
           </span>
         )
       case 'connecting':
         return (
           <span className="flex items-center gap-1 text-xs text-[var(--color-neo-pending)]">
             <Wifi size={12} className="animate-pulse" />
-            Connecting...
+            接続中...
           </span>
         )
       case 'error':
         return (
           <span className="flex items-center gap-1 text-xs text-[var(--color-neo-danger)]">
             <WifiOff size={12} />
-            Error
+            エラー
           </span>
         )
       default:
         return (
           <span className="flex items-center gap-1 text-xs text-[var(--color-neo-text-secondary)]">
             <WifiOff size={12} />
-            Disconnected
+            切断
           </span>
         )
     }
@@ -206,7 +207,7 @@ export function SpecCreationChat({
       <div className="flex items-center justify-between p-4 border-b-3 border-[var(--color-neo-border)] bg-white">
         <div className="flex items-center gap-3">
           <h2 className="font-display font-bold text-lg text-[#1a1a1a]">
-            Create Spec: {projectName}
+            仕様作成: {projectName}
           </h2>
           <ConnectionIndicator />
         </div>
@@ -215,7 +216,7 @@ export function SpecCreationChat({
           {isComplete && (
             <span className="flex items-center gap-1 text-sm text-[var(--color-neo-done)] font-bold">
               <CheckCircle2 size={16} />
-              Complete
+              完了
             </span>
           )}
 
@@ -223,10 +224,10 @@ export function SpecCreationChat({
           <button
             onClick={onExitToProject}
             className="neo-btn neo-btn-ghost text-sm py-2"
-            title="Exit chat and go to project (you can start the agent manually)"
+            title="チャットを終了してプロジェクトへ移動（エージェントは手動で開始できます）"
           >
             <ExternalLink size={16} />
-            Exit to Project
+            プロジェクトへ
           </button>
 
           <button
@@ -259,10 +260,10 @@ export function SpecCreationChat({
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
             <div className="neo-card p-6 max-w-md">
               <h3 className="font-display font-bold text-lg mb-2">
-                Starting Spec Creation
+                仕様作成を開始
               </h3>
               <p className="text-sm text-[var(--color-neo-text-secondary)]">
-                Connecting to Claude to help you create your app specification...
+                Claudeに接続してアプリ仕様の作成を支援します...
               </p>
               {connectionStatus === 'error' && (
                 <button
@@ -270,7 +271,7 @@ export function SpecCreationChat({
                   className="neo-btn neo-btn-primary mt-4 text-sm"
                 >
                   <RotateCcw size={14} />
-                  Retry Connection
+                  再接続
                 </button>
               )}
             </div>
@@ -363,10 +364,10 @@ export function SpecCreationChat({
               onKeyDown={handleKeyDown}
               placeholder={
                 currentQuestions
-                  ? 'Or type a custom response...'
+                  ? 'または自由に入力...'
                   : pendingAttachments.length > 0
-                    ? 'Add a message with your image(s)...'
-                    : 'Type your response... (or /exit to go to project)'
+                    ? '画像と一緒にメッセージを追加...'
+                    : '入力してください... (/exit でプロジェクトへ)'
               }
               className="neo-input flex-1"
               disabled={(isLoading && !currentQuestions) || connectionStatus !== 'connected'}
@@ -386,7 +387,7 @@ export function SpecCreationChat({
 
           {/* Help text */}
           <p className="text-xs text-[var(--color-neo-text-secondary)] mt-2">
-            Press Enter to send. Drag & drop or click <Paperclip size={12} className="inline" /> to attach images (JPEG/PNG, max 5MB).
+            Enterで送信。ドラッグ＆ドロップまたは <Paperclip size={12} className="inline" /> で画像添付（JPEG/PNG、最大5MB）
           </p>
         </div>
       )}
@@ -402,20 +403,20 @@ export function SpecCreationChat({
                 <>
                   <Loader2 size={20} className="animate-spin" />
                   <span className="font-bold">
-                    Starting agent{yoloEnabled ? ' (YOLO mode)' : ''}...
+                    エージェント起動中{yoloEnabled ? '（YOLOモード）' : ''}...
                   </span>
                 </>
               ) : initializerStatus === 'error' ? (
                 <>
                   <AlertCircle size={20} className="text-white" />
                   <span className="font-bold text-white">
-                    {initializerError || 'Failed to start agent'}
+                    {initializerError || 'エージェント起動に失敗しました'}
                   </span>
                 </>
               ) : (
                 <>
                   <CheckCircle2 size={20} />
-                  <span className="font-bold">Specification created successfully!</span>
+                  <span className="font-bold">仕様の作成が完了しました！</span>
                 </>
               )}
             </div>
@@ -426,7 +427,7 @@ export function SpecCreationChat({
                   className="neo-btn bg-white"
                 >
                   <RotateCcw size={14} />
-                  Retry
+                  再試行
                 </button>
               )}
               {initializerStatus === 'idle' && (
@@ -437,7 +438,7 @@ export function SpecCreationChat({
                     className={`neo-btn text-sm py-2 px-3 ${
                       yoloEnabled ? 'neo-btn-warning' : 'bg-white'
                     }`}
-                    title="YOLO Mode: Skip testing for rapid prototyping"
+                    title="YOLOモード: テストをスキップして高速開発"
                   >
                     <Zap size={16} className={yoloEnabled ? 'text-yellow-900' : ''} />
                     <span className={yoloEnabled ? 'text-yellow-900 font-bold' : ''}>
@@ -448,7 +449,7 @@ export function SpecCreationChat({
                     onClick={() => onComplete('', yoloEnabled)}
                     className="neo-btn neo-btn-primary"
                   >
-                    Continue to Project
+                    プロジェクトへ進む
                     <ArrowRight size={16} />
                   </button>
                 </>
